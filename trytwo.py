@@ -4,6 +4,7 @@ from tkinter import messagebox
 class frame:
     def __init__(self, master):
         self.root = master
+        self.root.geometry("1200x800") 
         self.root.title("Ring checker")
 
         self.entries = []
@@ -32,8 +33,8 @@ class frame:
         main_frame = tk.Frame(root)
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        canvas = tk.Canvas(main_frame)
-        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        canvas = tk.Canvas(main_frame, width=600, height=600)
+        canvas.pack(pady=10)
         self.canvas = canvas
 
         v_scrollbar = tk.Scrollbar(main_frame, orient=tk.VERTICAL, command=canvas.yview)
@@ -78,18 +79,20 @@ class frame:
         sample_frame_row3.pack()
         tk.Button(sample_frame_row3, text="Non-abelian addition", 
                  command=self.generate_non_abelian_addition).pack(side=tk.LEFT, padx=5)
-        tk.Button(sample_frame_row3, text="Non-associative", 
+        tk.Button(sample_frame_row3, text="Non-associative multiplication", 
                 command=self.generate_non_associative_sample).pack(side=tk.LEFT, padx=5)
-        tk.Button(sample_frame_row3, text="Non-commutative ring with unity",
-                command=self.generate_non_commutative_ring_with_unity_sample).pack(side=tk.LEFT, padx=5)
         
-        self.left_frame = tk.Frame(content_frame)
-        self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
-        self.right_frame = tk.Frame(content_frame)
-        self.right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
 
+        self.parent_frame = tk.Frame(content_frame)
+        self.parent_frame.pack(fill=tk.BOTH, expand=True)
+
+        self.left_frame = tk.Frame(self.parent_frame)
+        self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.right_frame = tk.Frame(self.parent_frame)
+        self.right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
         self.button_frame = tk.Frame(content_frame)
-        self.button_frame.pack(pady=10)
+        self.button_frame.pack(side=tk.BOTTOM,pady=10)
 
         self.check_frame = tk.Frame(content_frame)
         self.check_frame.pack(pady=10)
@@ -325,7 +328,7 @@ class frame:
             row_entries = []
             for j in range(n + 1):
                 if i == 0 and j == 0:
-                    tk.Label(self.left_frame, text="", width=4).grid(row=0, column=0)
+                    tk.Label(self.left_frame, text="+", width=4).grid(row=0, column=0)
                 elif i == 0:
                     tk.Label(self.left_frame, text=labels[j - 1], width=4).grid(row=0, column=j)
                 elif j == 0:
@@ -348,7 +351,8 @@ class frame:
             row_entries = []
             for j in range(n + 1):
                 if i == 0 and j == 0:
-                    tk.Label(self.right_frame, text="", width=4).grid(row=0, column=0)
+                    # Show a multiplication cross at the top-left corner
+                    tk.Label(self.right_frame, text="×", width=4).grid(row=0, column=0)
                 elif i == 0:
                     tk.Label(self.right_frame, text=labels[j - 1], width=4).grid(row=0, column=j)
                 elif j == 0:
