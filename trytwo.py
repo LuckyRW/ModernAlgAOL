@@ -32,25 +32,31 @@ class frame:
 
         main_frame = tk.Frame(root)
         main_frame.pack(fill=tk.BOTH, expand=True)
+ 
+        canvas_container = tk.Frame(main_frame)
+        canvas_container.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(200, 0))  
 
-        canvas = tk.Canvas(main_frame, width=600, height=600)
-        canvas.pack(pady=10)
-        self.canvas = canvas
-
-        v_scrollbar = tk.Scrollbar(main_frame, orient=tk.VERTICAL, command=canvas.yview)
+        canvas = tk.Canvas(canvas_container, width=800, height=600)
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        v_scrollbar = tk.Scrollbar(canvas_container, orient=tk.VERTICAL, command=canvas.yview)
         v_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-        h_scrollbar = tk.Scrollbar(self.root, orient=tk.HORIZONTAL, command=canvas.xview)
-        h_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
-
+        
+        h_scrollbar = tk.Scrollbar(root, orient=tk.HORIZONTAL, command=canvas.xview)
+        h_scrollbar.pack(side=tk.BOTTOM, fill=tk.X, padx=50) 
+        
         canvas.configure(yscrollcommand=v_scrollbar.set, xscrollcommand=h_scrollbar.set)
 
         content_frame = tk.Frame(canvas)
         canvas.create_window((0, 0), window=content_frame, anchor="nw")
+
+        content_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        
+        self.canvas = canvas
+
         self.button_frame = tk.Frame(content_frame)
         self.button_frame.pack(pady=10)
-        
-        # Sample tables frame
+
         self.sample_frame = tk.Frame(content_frame)
         self.sample_frame.pack(pady=5)
         tk.Label(self.sample_frame, text="Sample Tables:").pack()
@@ -97,7 +103,7 @@ class frame:
         self.check_frame = tk.Frame(content_frame)
         self.check_frame.pack(pady=10)
         
-        self.results_text = tk.Text(content_frame, height=10, width=80)
+        self.results_text = tk.Text(content_frame, height=20, width=60)
         self.results_text.pack(pady=10)
     
     def generate_sample_no_identity(self):
@@ -118,7 +124,6 @@ class frame:
         self.fill_table(add_table,mul_table)
     
     def generate_field_sample(self):
-        """Generate a field-like sample (all non-zero have inverses)"""
         self.n_entry.delete(0, tk.END)
         self.n_entry.insert(0, "3")
         self.generate_tables()
@@ -135,7 +140,6 @@ class frame:
         self.fill_table(add_table, mul_table)
     
     def generate_non_distributive_sample(self):
-        """Generate a sample that fails distributivity"""
         self.n_entry.delete(0, tk.END)
         self.n_entry.insert(0, "3")
         self.generate_tables()
@@ -152,7 +156,6 @@ class frame:
         self.fill_table(add_table, mul_table)
     
     def generate_boolean_ring_sample(self):
-        """Generate a boolean ring (x^2 = x for all x)"""
         self.n_entry.delete(0, tk.END)
         self.n_entry.insert(0, "2")
         self.generate_tables()
@@ -167,7 +170,6 @@ class frame:
         self.fill_table(add_table, mul_table)
     
     def generate_non_abelian_addition(self):
-        """Generate a zero ring (xy = 0 for all x,y)"""
         self.n_entry.delete(0, tk.END)
         self.n_entry.insert(0, "6")
         self.generate_tables()
@@ -211,15 +213,15 @@ class frame:
         self.generate_tables()
         add_table = [
             ['A', 'B', 'C', 'D'],
-            ['B', 'A', 'D', 'C'],
+            ['B', 'C', 'D', 'A'],
             ['C', 'D', 'A', 'B'],
-            ['D', 'C', 'B', 'A']
+            ['D', 'A', 'B', 'C']
         ]
         mul_table = [
             ['A', 'A', 'A', 'A'],  
             ['A', 'B', 'C', 'D'],  
-            ['A', 'C', 'C', 'A'],  
-            ['A', 'D', 'A', 'D']  
+            ['A', 'C', 'A', 'C'],  
+            ['A', 'D', 'C', 'B']  
         ]
         self.fill_table(add_table, mul_table)
         
@@ -260,6 +262,15 @@ class frame:
         self.right_frame.update_idletasks()
         self.right_frame.master.update_idletasks()
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        self.resize_window()
+    def resize_window(self):
+        width = self.right_frame.winfo_width()
+        height = self.right_frame.winfo_height()
+
+        self.root.geometry(f"{width + 800}x{height + 800}")
+        self.root.update_idletasks()
+        
+        
 
     
     def put_buttons(self):
@@ -291,27 +302,27 @@ class frame:
         else:
             results.append("Commutative: No")
         if self.check_identity()[0]:
-            results.append("Unity: Yes |" + self.check_identity()[1])
+            results.append("Unity element: Yes |" + self.check_identity()[1])
         else:
             results.append("Unity: No")
         if self.check_zero_divisor()[0]:
-            results.append("Zero Divisor: Yes |" + self.check_zero_divisor()[1])
+            results.append("Exists zero divisor? : Yes |" + self.check_zero_divisor()[1])
         else:
-            results.append("Zero Divisor: No")
+            results.append("Exists zero divisor? : No")
         if self.check_inverse()[0]:
-            results.append("Inverse: Yes |" + self.check_inverse()[1])
+            results.append("All non-zero elements are units: Yes |" + self.check_inverse()[1])
         else:
-            results.append("Inverse: No")
-        if self.check_inverse()[0] and self.check_identity()[0]:
-            results.append("Analysis: \nThis is a field! the multiplicative group is commutative, doesnt have zero divisors, has a unity element, and all non-zero elements have inverses. \n We know from class that fields are also both integral domains and division rings!")
+            results.append("All non-zero elements are units: No")
+        if self.check_inverse()[0] and self.check_identity()[0]: #by Wedderburn's little theorem, this is enough to check if it is a field
+            results.append("Analysis: \nThis is a field! the multiplicative group is commutative, \ndoesnt have zero divisors, has a unity element, and all non-zero elements are units. \n It is known that fields are also both integral domains and division rings! \n A known example of a field is Z/pZ, where p is a prime \nnumber.")
         elif self.check_commutative()[0] and self.check_identity()[0]:
-            results.append("Analysis: \nThis is a commutative ring with unity! It is neither a division ring nor an integral ring as it has zero divisors and does not have inverses for all non-zero elements.")
+            results.append("Analysis: \nThis is a commutative ring with unity! It is neither a \ndivision ring nor an integral domain as it has zero divisors and does not have inverses for all non-zero elements.\n A known example of a ring of this type is Z/nZ, where n is a composite number.")
         elif self.check_commutative()[0] and self.check_identity()[0] == False:
-            results.append("Analysis: \nThis is a commutative ring! The multiplicative group is commutative, but has no unity element. \n It is neither division ring or integral ring as both integral domains and division rings requires AT LEAST a unity element.")
+            results.append("Analysis: \nThis is a commutative ring! The multiplicative group is \ncommutative, but has no unity element. \n It is neither division ring or integral domain \nas both integral domains and division rings requires \nAT LEAST a unity element.\n A known example of a ring of this type is the zero ring, \nwhere all elements are equal to zero.")
         elif self.check_identity()[0] and self.check_commutative()[0] == False:
-            results.append("Analysis: \nThis is a ring with unity! It is associative, has an identity element, but is not commutative. \n It isn't a division ring as there doesnt exist finite strictly skew fields by Wedderburn's little theorem, and it is not an integral domain as it has to be commutative.")
+            results.append("Analysis: \nThis is a ring with unity! It is associative, has an unity element, but is not commutative. \n It isn't a division ring as there doesnt exist finite strictly skew fields by Wedderburn's little theorem, and it is not an integral domain as it has to be commutative.")
         elif self.check_identity()[0] == False and self.check_commutative()[0] == False:
-            results.append("Analysis: \nThis is a ring! \nDoesnt have a unity element, is not commutative, and has zero divisors. \n It is neither a division ring nor an integral domain as it has no unity element. This guy certainly doesnt have a lot going for it ^^;")
+            results.append("Analysis: \nThis is a ring! \nDoesnt have a unity element, is not commutative, and has zero divisors. \n It is neither a division ring nor an integral domain as it has no unity element.\n A known example of a ring of this type is the ring of even square matrices.")
         self.results_text.delete(1.0, tk.END)
         self.results_text.insert(tk.END, "\n".join(results))
         print("\n".join(results)) 
@@ -351,7 +362,6 @@ class frame:
             row_entries = []
             for j in range(n + 1):
                 if i == 0 and j == 0:
-                    # Show a multiplication cross at the top-left corner
                     tk.Label(self.right_frame, text="×", width=4).grid(row=0, column=0)
                 elif i == 0:
                     tk.Label(self.right_frame, text=labels[j - 1], width=4).grid(row=0, column=j)
