@@ -56,5 +56,6 @@ Not associative for: B, C, C -> A != B
 
 NOTE:  
 Currently case-sensitive and cannot change the name of the elements (also, use ALL CAPS for elements).  
+This application will automatically detect the ones and zeros of a given ring. However,  
 It isn't possible yet to automatically assign an element as the identity element of such group, or in short to assign the ones and zeros of the ring.  
 A scroll bar exists at the side and the bottom of the application in the case of extremely large tables, although admittedly it doesn't stand out much.  
